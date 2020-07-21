@@ -14,12 +14,12 @@ class Queue {
         };
 
         // 上传队列，仅包括等待上传的文件
-        this._queue = {};
-        // 存储左右文件
+        this._queue = [];
+        // 存储所有文件
         this._map = {};
     }
 
-    apend (file) {
+    append (file) {
         this._queue.push(file);
         this._fileAdded(file);
         return this;
@@ -50,7 +50,7 @@ class Queue {
 
     _fileAdded (file) {
         let me = this;
-        existing = this._map[file.id];
+        let existing = this._map[file.id];
 
         if(!existing) {
             this._map[file.id] = file

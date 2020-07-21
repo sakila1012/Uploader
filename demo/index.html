@@ -6,11 +6,16 @@
     <title>Document</title>
 
     <script src="../node_modules/jquery/dist/jquery.js"></script>
+    <!-- <script src="../src/index.js" type="module"></script> -->
 </head>
 <body>
     <div class="uploader">
         <input type="file" id="file" multiple>
     </div>
-    <script src="../src/index.js"></script>
+    
+    <script type="module">
+        import Uploader from '../src/index.js'
+        let uploader = new Uploader();
+    </script>
 </body>
 </html>
