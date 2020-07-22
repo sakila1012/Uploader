@@ -39,7 +39,7 @@ class WUFile {
         };
 
         // 存储文件状态，防止通过属性直接修改
-        statusMap[ this.id ] = WUFile.Status.INITED;
+        statusMap[ this.id ] = this.Status.INITED;
 
     }
     /**

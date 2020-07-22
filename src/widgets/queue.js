@@ -38,7 +38,7 @@ class Queues {
     file = me._wrapFile( file );
     me.queue.append( file )
     me.mediator.trigger( 'fileQueued', file );
-
+    return file;
   }
 
   /**
@@ -75,9 +75,44 @@ class Queues {
     me._tick()
   }
 
+  CuteFile (file, chunks) {
+    
+  }
+
+  _nextBlock() {
+    let me = this,
+        act,
+        next, done;
+    next = me.pending.shift();
+    done = file => {
+      if(!file) {
+        return null;
+      }
+      act = me.CuteFile(file, 0);
+      me.stack.push(act);
+      return act.shift() 
+    }
+
+    if(this.isPromise(next)) {
+      return next;
+    }
+
+    return done(next)
+
+
+  }
+
+  isPromise (obj) {
+    return true;
+  }
+
   _tick () {
+    let me = this, 
+      val;
 
-
+    if(me.pool.length < 4 && (val = me._nextBlock)) {
+      console.log(me)
+    }  
 
   }
 
