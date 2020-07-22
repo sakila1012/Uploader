@@ -4,10 +4,13 @@ import WUFile from '../file.js'
 
 class Queues {
   constructor (opts) {
-    let me = this;
-    me.queue = new Queue();
-    me.stats = me.queue.stats;
-    me.mediator = new Mediator();
+    this.queue = new Queue();
+    this.stats = this.queue.stats;
+    this.mediator = new Mediator();
+    this.running = false;
+    
+    // 记录当前正在传的数据，跟threads相关
+    this.pool = [];
 
     this._ruid = null;
   }
@@ -59,9 +62,23 @@ class Queues {
 
     if(files.length ){
       setTimeout(function() {
-        me.request('start-upload');
+        me.startSend();
       }, 20 );
     }
+  }
+
+  startSend () {
+    let me = this;
+
+    me.running = true;
+
+    me._tick()
+  }
+
+  _tick () {
+
+
+
   }
 
 }
