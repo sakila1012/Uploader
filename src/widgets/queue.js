@@ -7,8 +7,10 @@ class Queues {
     this.queue = new Queue();
     this.stats = this.queue.stats;
     this.mediator = new Mediator();
+    this.WuFile = new WUFile();
+    this.STATUS = this.WuFile.Status;
     this.running = false;
-    
+
     // 记录当前正在传的数据，跟threads相关
     this.pool = [];
 
@@ -62,12 +64,12 @@ class Queues {
 
     if(files.length ){
       setTimeout(function() {
-        me.startSend();
+        me.startUpload();
       }, 20 );
     }
   }
 
-  startSend () {
+  startUpload () {
     let me = this;
 
     me.running = true;
@@ -75,14 +77,74 @@ class Queues {
     me._tick()
   }
 
-  CuteFile (file, chunks) {
-    
+  CuteFile (file, chunkSize) {
+    let pending = [],
+        blob = file.source,
+        total = blob.size,
+        chunks = chunkSize ? Math.ceil(total /chunkSize) : 1,
+        start = 0,
+        index = 0,
+        len, api;
+
+    api = {
+      file: file,
+
+      has: () => {
+        !!pending.length;
+      },
+
+      shift: () => {
+        pending.shift()
+      },
+
+      unshift: (block) => {
+        pending.unshift(block)
+      }
+    };
+
+    while(index < chunks) {
+      len = Math.min(chunkSize, total - start);
+
+      pending.push({
+        file: file,
+        start: start,
+        end: chunkSize ? (start + len) : total,
+        total: total,
+        chunks: chunks,
+        chunk: chunk++,
+        cuted: api
+      })
+
+      start += len;
+    }
+
+    file.blocks = pending.concat();
+    file.remaning = pending.length;
+
+    return api;
   }
 
-  _nextBlock() {
+  _getStack () {
+    let i = 0,
+        me = this,
+        act;
+    while((act = me.stack[ i++ ])) {
+      if(act.has() && act.file.getStatus() == me.Status.PROGRESS) {
+        return act;
+      } else if (!act.has() || 
+              act.file.getStatus() !== me.Status.PROGRESS && 
+              act.file.getStatus() !== me.Status.INTERUPT) {
+        me.stack.splice(--i, 1)
+      }
+    }
+  }
+
+  _nextBlock () {
     let me = this,
         act,
         next, done;
+
+    
     next = me.pending.shift();
     done = file => {
       if(!file) {
@@ -98,22 +160,25 @@ class Queues {
     }
 
     return done(next)
-
-
   }
 
   isPromise (obj) {
-    return true;
+    return !!obj && (typeof obj === 'object' || typeof obj === 'function') && typeof obj.then === 'function';
   }
 
   _tick () {
     let me = this, 
       val;
 
-    if(me.pool.length < 4 && (val = me._nextBlock)) {
-      console.log(me)
+    if(me.pool.length < 4 && (val = me._nextBlock())) {
+      me.startSend(val)
+      me._tick()
     }  
 
+  }
+
+  _startSend (block) {
+    console.log(block)
   }
 
 }
